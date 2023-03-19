@@ -39,7 +39,7 @@ PAdptArray CreateAdptArray(COPY_FUNC copy, DEL_FUNC delete, PRINT_FUNC print) //
     memset(created_array->myArray, 0, sizeof(PElement));// We initialize the array to 0
 
     created_array->size = 0;// We start the size with 0 because its empty
-    created_array->MyCopyFunc = copy;// 
+    created_array->MyCopyFunc = copy;// Give the array its funcs
     created_array->MyDelFunc = delete;
     created_array->MyPrintFunc = print;
 
@@ -47,7 +47,7 @@ PAdptArray CreateAdptArray(COPY_FUNC copy, DEL_FUNC delete, PRINT_FUNC print) //
 };
 
 void DeleteAdptArray(PAdptArray to_delete)
-{
+{//free the memory by first going to every cell in the array if its not NULL we free him, after that free the whole array and the whole struct.
     for (int i = 0; i < to_delete->size; i++)
     {
         if(to_delete->myArray[i] != NULL)
@@ -60,37 +60,37 @@ void DeleteAdptArray(PAdptArray to_delete)
 Result SetAdptArrayAt(PAdptArray currentArray, int place, PElement toAdd)
 {
     if (currentArray == NULL || place < 0)
-        return FAIL;
+        return FAIL; //Check if the place is negative or if the Struct couldnt fine memory
 
-    if (place > currentArray->size)
+    if (place > currentArray->size)// Chech if the size of the current array is smaller than the index to place the added element
     {
-        currentArray->myArray = (PElement)realloc(currentArray->myArray, (sizeof(PElement) * (place + 1)));
-        if (currentArray->myArray == NULL)
+        currentArray->myArray = (PElement)realloc(currentArray->myArray, (sizeof(PElement) * (place + 1)));//Take a new spot in the memory for a bigger array
+        if (currentArray->myArray == NULL)// Check if the memoery was allocated
         {
-            free(currentArray);
+            free(currentArray);// If not free the struct
             return FAIL;
         }
 
-        for (int i = currentArray->size; i < place + 1; i++)
+        for (int i = currentArray->size; i < place + 1; i++)// Go in the array from the last place we know until the new place and initialize the cells
         {
             currentArray->myArray[i] = 0;
         }
 
-        currentArray->myArray[place] = currentArray->MyCopyFunc(toAdd);
-        currentArray->size = place + 1;
+        currentArray->myArray[place] = currentArray->MyCopyFunc(toAdd);//Assign a copy of the element to the selected cell
+        currentArray->size = place + 1;// We begin from 0 so we have to put + 1 in the size
         return SUCCESS;
     }
 
     else
     {
-        if (currentArray->myArray[place] != 0)
+        if (currentArray->myArray[place] != 0) // Check if the cell is occupied if so delete the cell and assign a copy of the element
         {
             currentArray->MyDelFunc(currentArray->myArray[place]);
             currentArray->myArray[place] = currentArray->MyCopyFunc(toAdd);
             return SUCCESS;
         }
 
-        else
+        else // The cell is not occupied and has 0 in it so just assign a copy of the element
         {
             currentArray->myArray[place] = currentArray->MyCopyFunc(toAdd);
             return SUCCESS;
@@ -100,15 +100,15 @@ Result SetAdptArrayAt(PAdptArray currentArray, int place, PElement toAdd)
 
 PElement GetAdptArrayAt(PAdptArray currentArray, int to_find)
 {
-    if (to_find < 0 || to_find > currentArray->size || currentArray->myArray[to_find] == NULL)
-        return NULL;
+    if (to_find < 0 || to_find > currentArray->size || currentArray->myArray[to_find] == NULL) 
+        return NULL;// Cant accept negative num and also if its bigger than the array its already a NULL and we handle NULL because the client didnt 0_0 !
 
-    return currentArray->MyCopyFunc(currentArray->myArray[to_find]);
+    return currentArray->MyCopyFunc(currentArray->myArray[to_find]);// Return the element in the wanted cell
 };
 
 int GetAdptArraySize(PAdptArray myArray)
 {
-    if (myArray == NULL)
+    if (myArray == NULL) // If the struct couldnt allocate memory return -1, as the readme file said
     {
         return -1;
     }
@@ -119,7 +119,7 @@ int GetAdptArraySize(PAdptArray myArray)
     }
 };
 
-void PrintDB(PAdptArray pArray)
+void PrintDB(PAdptArray pArray) // To print we just want the elemnts and not the 0 so we avoid 0 and print everything else
 {
     for (int i = 0; i < pArray->size; i++)
     {
